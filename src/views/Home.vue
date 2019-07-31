@@ -9,7 +9,7 @@
                         :opened="infoOpened"
                         :position="infoPosition"
                         :options="infoOptions"
-                        @closeclick="infoOpened=false">
+                        @closeclick="closeInfo">
         {{infoContent}}
       </gmap-info-window>
       <gmap-marker
@@ -21,21 +21,17 @@
       ></gmap-marker>
     </gmap-map>
     <input type="text" class="form-control mb-4 mt-4" v-model="search" placeholder="Search by country name"/>
-    <div class="row">
-      <div class="col-4" v-for="(location,index) in filteredLocations" :key="index">
-              <a href="" class="" @click.prevent="toggleInfo(location)">{{location.name}}</a>
-
-      </div>
-    </div>
+    <country-list @clicked="toggleInfo" :countries="filteredLocations" />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import { gmapApi } from 'vue2-google-maps'
-
+import CountryList from '@/components/list'
 export default {
   name: 'home',
+  components: { CountryList },
   async mounted () {
     await this.$store.dispatch('getLocations')
     this.getMarkers()
@@ -100,10 +96,17 @@ export default {
       this.infoPosition = location.position
       this.$refs.mapRef.$mapPromise.then(map => {
         map.panTo(location.position)
+        map.setZoom(5)
       })
-      this.zoom = 5
       this.infoOpened = true
       this.infoContent = location.name
+    },
+    closeInfo () {
+      this.infoOpened = false
+      this.$refs.mapRef.$mapPromise.then(map => {
+        map.panTo(this.center)
+        map.setZoom(2)
+      })
     }
   }
 
@@ -113,7 +116,6 @@ export default {
   .gm-style .gm-style-iw {
     min-height: 50px;
   }
-
   /*style the p tag*/
   .gm-style .gm-style-iw #google-popup p {
     padding: 10px;
