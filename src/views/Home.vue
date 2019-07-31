@@ -3,7 +3,7 @@
     <gmap-map
       ref="mapRef"
       :center="center"
-      :zoom="12"
+      :zoom="zoom"
       style="width:100%;  min-height: 400px; height: 100%">
       <gmap-info-window class="w-100"
                         :opened="infoOpened"
@@ -44,6 +44,7 @@ export default {
     return {
       markers: [],
       search: '',
+      zoom: 12,
       center: { lat: 45.508, lng: -73.587 },
       map: 'map',
       infoOptions: {
@@ -97,6 +98,10 @@ export default {
       }
       this.center = location.position
       this.infoPosition = location.position
+      this.$refs.mapRef.$mapPromise.then(map => {
+        map.panTo(location.position)
+      })
+      this.zoom = 5
       this.infoOpened = true
       this.infoContent = location.name
     }
