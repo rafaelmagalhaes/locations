@@ -1,5 +1,5 @@
 <template>
-  <div class="home" v-if="locations.length">
+  <div class="container" v-if="locations.length">
     <gmap-map
       ref="mapRef"
       :center="center"
@@ -20,8 +20,12 @@
         @click="toggleInfo(m,index)"
       ></gmap-marker>
     </gmap-map>
-    <div v-for="(location,index) in locations" :key="index">
-      <a href="" @click="toggleInfo(location)">{{location.name}}</a>
+    <input type="text" class="form-control mb-4 mt-4" v-model="search" placeholder="Search by country name"/>
+    <div class="row">
+      <div class="col-4" v-for="(location,index) in filteredLocations" :key="index">
+              <a href="" class="" @click.prevent="toggleInfo(location)">{{location.name}}</a>
+
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +43,7 @@ export default {
   data () {
     return {
       markers: [],
+      search: '',
       center: { lat: 45.508, lng: -73.587 },
       map: 'map',
       infoOptions: {
@@ -56,6 +61,11 @@ export default {
   computed: {
     locations () {
       return this.$store.getters.getLocations
+    },
+    filteredLocations () {
+      return this.locations.filter(location => {
+        return location.name.toLowerCase().includes(this.search.toLowerCase())
+      })
     },
     google: gmapApi // call google map api to be able to refer to google maps api,
   },
@@ -89,7 +99,6 @@ export default {
       this.infoPosition = location.position
       this.infoOpened = true
       this.infoContent = location.name
-      this.infoOptions.pixelOffset = new google.maps.Size(0, -150)
     }
   }
 
