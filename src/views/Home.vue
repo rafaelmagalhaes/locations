@@ -5,12 +5,19 @@
               :center="center"
               :zoom="12"
               style="width:100%;  min-height: 400px; height: 100%">
+      <gmap-info-window class="w-100"
+                        :opened="infoOpened"
+                        :position="infoPosition"
+                        :options="infoOptions"
+                        @closeclick="infoOpened=false">
+                          {{infoContent}}
+      </gmap-info-window>
       <gmap-marker
         :key="index"
         v-for="(m, index) in markers"
         :position="m.position"
         :clickable="true"
-        @click="center=m.position"
+        @click="toggleInfo(m,index)"
       ></gmap-marker>
     </gmap-map>
     <div v-for="(location,index) in locations" :key="index">
@@ -32,7 +39,17 @@ export default {
     return {
       markers: [],
       center: { lat: 45.508, lng: -73.587 },
-      map: 'map'
+      map: 'map',
+      infoOptions: {
+        width: 0,
+        height: 0
+      },
+      infoPosition: {
+        lat: 0,
+        lng: 0
+      },
+      infoOpened: false,
+      infoContent: ''
     }
   },
   computed: {
@@ -53,12 +70,19 @@ export default {
           }
           this.markers.push({
             position: cords,
-            title: location.country
+            name: location.name
           })
           markerBounds.extend(cords)
         })
         map.fitBounds(markerBounds)
       })
+    },
+    toggleInfo (location, index) {
+      this.center = location.position
+      this.infoPosition = location.position
+      this.infoOpened = true
+      this.infoContent = location.name
+      this.infoOptions.pixelOffset = new google.maps.Size(0, -42)
     }
   }
 
@@ -66,9 +90,7 @@ export default {
 </script>
 <style>
   .gm-style .gm-style-iw {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 200px;
+    min-height:50px;
   }
 
   /*style the p tag*/
