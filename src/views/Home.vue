@@ -1,16 +1,16 @@
 <template>
   <div class="home" v-if="locations.length">
     <gmap-map
-              ref="mapRef"
-              :center="center"
-              :zoom="12"
-              style="width:100%;  min-height: 400px; height: 100%">
+      ref="mapRef"
+      :center="center"
+      :zoom="12"
+      style="width:100%;  min-height: 400px; height: 100%">
       <gmap-info-window class="w-100"
                         :opened="infoOpened"
                         :position="infoPosition"
                         :options="infoOptions"
                         @closeclick="infoOpened=false">
-                          {{infoContent}}
+        {{infoContent}}
       </gmap-info-window>
       <gmap-marker
         :key="index"
@@ -21,7 +21,7 @@
       ></gmap-marker>
     </gmap-map>
     <div v-for="(location,index) in locations" :key="index">
-      <a>{{location.name}}</a>
+      <a href="" @click="toggleInfo(location)">{{location.name}}</a>
     </div>
   </div>
 </template>
@@ -29,6 +29,7 @@
 <script>
 // @ is an alias to /src
 import { gmapApi } from 'vue2-google-maps'
+
 export default {
   name: 'home',
   async mounted () {
@@ -78,11 +79,17 @@ export default {
       })
     },
     toggleInfo (location, index) {
+      if (!location.position) {
+        location.position = {
+          lat: location.latitude,
+          lng: location.longitude
+        }
+      }
       this.center = location.position
       this.infoPosition = location.position
       this.infoOpened = true
       this.infoContent = location.name
-      this.infoOptions.pixelOffset = new google.maps.Size(0, -42)
+      this.infoOptions.pixelOffset = new google.maps.Size(0, -150)
     }
   }
 
@@ -90,7 +97,7 @@ export default {
 </script>
 <style>
   .gm-style .gm-style-iw {
-    min-height:50px;
+    min-height: 50px;
   }
 
   /*style the p tag*/
