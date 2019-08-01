@@ -1,7 +1,8 @@
 # locations
 Project that shows a list of locations in google maps with markers using vue2-google-maps plugin
 
-#Demo 
+# Demo 
+
 http://locations.rrrm.co.uk
 
 ## Project setup
