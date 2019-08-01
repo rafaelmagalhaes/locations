@@ -17,11 +17,11 @@
         v-for="(m, index) in markers"
         :position="m.position"
         :clickable="true"
-        @click="toggleInfo(m,index)"
+        @click="openInfo(m,index)"
       ></gmap-marker>
     </gmap-map>
     <input type="text" class="form-control mb-4 mt-4" v-model="search" placeholder="Search by country name"/>
-    <country-list @clicked="toggleInfo" :countries="filteredLocations" />
+    <country-list @clicked="openInfo" :countries="filteredLocations" />
   </div>
 </template>
 
@@ -33,8 +33,8 @@ export default {
   name: 'home',
   components: { CountryList },
   async mounted () {
-    await this.$store.dispatch('getLocations')
-    this.getMarkers()
+    await this.$store.dispatch('getLocations') // fetch the locations endpoint from the vuex store
+    this.getMarkers() // call this functions after locations has been dispatched
   },
   data () {
     return {
@@ -44,8 +44,10 @@ export default {
       center: { lat: 45.508, lng: -73.587 },
       map: 'map',
       infoOptions: {
-        width: 0,
-        height: 0
+        pixelOffset: { // offset infowindow so it visually sits nicely on top of our marker
+          width: 0,
+          height: -35
+        }
       },
       infoPosition: {
         lat: 0,
@@ -57,53 +59,54 @@ export default {
   },
   computed: {
     locations () {
-      return this.$store.getters.getLocations
+      return this.$store.getters.getLocations // get the location state from vuex
     },
-    filteredLocations () {
+    filteredLocations () { // search for location
       return this.locations.filter(location => {
-        return location.name.toLowerCase().includes(this.search.toLowerCase())
+        return location.name.toLowerCase().includes(this.search.toLowerCase()) // check if search query matches any country name
       })
     },
     google: gmapApi // call google map api to be able to refer to google maps api,
   },
   methods: {
     getMarkers () {
-      this.$refs.mapRef.$mapPromise.then(map => {
+      this.$refs.mapRef.$mapPromise.then(map => { // access the map
         let markerBounds = this.google && new google.maps.LatLngBounds()
-        let cords
-        this.locations.map(location => {
+        let cords // create cordinates empty variable
+        this.locations.map(location => { // loop over the locations from the state
           cords = {
             lat: location.latitude,
             lng: location.longitude
-          }
-          this.markers.push({
+          } // assign lat and lng from the values to cords variable
+
+          this.markers.push({ // push all cord to the markers array
             position: cords,
-            name: location.name
+            name: location.name // set the name so we can access it in the infoWindow
           })
           markerBounds.extend(cords)
         })
-        map.fitBounds(markerBounds)
+        map.fitBounds(markerBounds) // center the map based of the markers
       })
     },
-    toggleInfo (location, index) {
-      if (!location.position) {
+    openInfo (location, index) {
+      if (!location.position) { // if theres not position set the position
         location.position = {
           lat: location.latitude,
           lng: location.longitude
         }
       }
-      this.center = location.position
-      this.infoPosition = location.position
-      this.$refs.mapRef.$mapPromise.then(map => {
+      this.center = location.position // center the map around the location object
+      this.infoPosition = location.position // set the position for the info window
+      this.$refs.mapRef.$mapPromise.then(map => { // access the map and set zoom to 5 and pan to location
         map.panTo(location.position)
         map.setZoom(5)
       })
-      this.infoOpened = true
-      this.infoContent = location.name
+      this.infoOpened = true // opne the infowindow
+      this.infoContent = location.name // set the content to the country name
     },
     closeInfo () {
-      this.infoOpened = false
-      this.$refs.mapRef.$mapPromise.then(map => {
+      this.infoOpened = false // close the infowindow
+      this.$refs.mapRef.$mapPromise.then(map => { // access map and return to center  and zoom out of location
         map.panTo(this.center)
         map.setZoom(2)
       })
