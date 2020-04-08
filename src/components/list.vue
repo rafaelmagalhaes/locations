@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row" v-if="countries.length">
-      <div class="col-4 mb-5" v-for="(location,index) in countries" :key="index">
+      <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6 mb-5" v-for="(location,index) in countries" :key="index">
         <a href="" class="btn btn-outline-primary" @click.prevent="getLocation(location,index)">{{location.name}}</a>
       </div>
     </div>
@@ -16,7 +16,7 @@ export default {
   },
   methods: {
     getLocation (location, index) {
-      this.$emit('clicked', location, index)
+      this.$emit('clicked', location, index) // emit the selected object to parent
     }
   }
 }
